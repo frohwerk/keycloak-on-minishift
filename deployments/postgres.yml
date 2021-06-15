@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-database
+  labels:
+    app: keycloak-database
+spec:
+  selector:
+    app: keycloak-database
+  ports:
+  - name: http
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  sessionAffinity: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: keycloak-database
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: "4Gi"
+  volumeName: pv0001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-database
+  labels:
+    app: keycloak-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak-database
+  template:
+    metadata:
+      labels:
+        app: keycloak-database
+    spec:
+      containers:
+      - name: postgresql-12
+        image: registry.redhat.io/rhel8/postgresql-12
+        env:
+        - name: POSTGRESQL_USER
+          value: "keycloak"
+        - name: POSTGRESQL_PASSWORD
+          value: "kaolcyek"
+        - name: POSTGRESQL_DATABASE
+          value: "keycloak"
+        - name: POSTGRESQL_ADMIN_PASSWORD
+          value: "admin"
+        ports:
+        - containerPort: 5432
+        resources:
+          limits:
+            cpu: "0.05"
+            memory: "512Mi"
+        volumeMounts:
+        - name: "keycloak-database-volume"
+          mountPath: "/var/lib/pgsql/data"
+      volumes:
+      - name: "keycloak-database-volume"
+        persistentVolumeClaim:
+          claimName: "keycloak-database"
+      imagePullSecrets:
+      - name: registry.redhat.io
