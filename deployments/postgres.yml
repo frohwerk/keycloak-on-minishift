@@ -24,7 +24,6 @@ spec:
   resources:
     requests:
       storage: "4Gi"
-  volumeName: pv0001
 ---
 apiVersion: apps/v1
 kind: Deployment

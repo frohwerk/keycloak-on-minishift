@@ -1,1 +1,3 @@
 credentials/ 
+deployments/secret.json
+deployments/secret.yml
